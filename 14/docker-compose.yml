@@ -1,0 +1,37 @@
+version: '2'
+services:
+  db:
+    image: postgres:14
+    environment:
+      #- HOST=db
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_USER=odoo
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    restart: always             # run as a service  
+    networks:
+      - odoov15
+  odoo14:
+    image: odoo:15.0
+    depends_on:
+      - db
+    ports:
+      - "8014:8065"
+    #tty: true
+    #command: -- --dev=reload
+    volumes:
+      - odoo15-web-data:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./addons:/mnt/extra-addons
+    restart: always             # run as a service 
+    container_name: odoo15
+    networks:
+      - odoov15
+volumes:
+  odoo15-web-data:
+  odoo15-db-data:
+
+networks:
+  odoov15:
