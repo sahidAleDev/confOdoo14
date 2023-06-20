@@ -1,34 +1,37 @@
-version: '3.1'
+version: '2'
 services:
-  web:
-    image: odoo:16.0
-    depends_on:
-      - db
-    ports:
-      - "8069:8069"
-    volumes:
-      - odoo-web-data:/var/lib/odoo
-      - ./config:/etc/odoo
-      - ./addons:/mnt/extra-addons
-    environment:
-      - PASSWORD_FILE=/run/secrets/postgresql_password
-    secrets:
-      - postgresql_password
   db:
-    image: postgres:15
+    image: postgres:14
     environment:
+      #- HOST=db
       - POSTGRES_DB=postgres
-      - POSTGRES_PASSWORD_FILE=/run/secrets/postgresql_password
+      - POSTGRES_PASSWORD=odoo
       - POSTGRES_USER=odoo
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
-      - odoo-db-data:/var/lib/postgresql/data/pgdata
-    secrets:
-      - postgresql_password
+      - ./postgres:/var/lib/postgresql/data
+    restart: always             # run as a service  
+    networks:
+      - odoov15
+  odoo14:
+    image: odoo:15.0
+    depends_on:
+      - db
+    ports:
+      - "8014:8065"
+    #tty: true
+    #command: -- --dev=reload
+    volumes:
+      - odoo15-web-data:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./addons:/mnt/extra-addons
+    restart: always             # run as a service 
+    container_name: odoo15
+    networks:
+      - odoov15
 volumes:
-  odoo-web-data:
-  odoo-db-data:
+  odoo15-web-data:
+  odoo15-db-data:
 
-secrets:
-  postgresql_password:
-    file: odoo_pg_pass
+networks:
+  odoov15:
